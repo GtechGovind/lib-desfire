@@ -17,6 +17,11 @@ updates:
       day: monday
     open-pull-requests-limit: 5
     labels: [dependencies, javascript]
+    # Keep compiler updates inside typescript-eslint 8.73's supported range.
+    # Upgrade the compiler and parser together before accepting TypeScript 6.1+.
+    ignore:
+      - dependency-name: typescript
+        versions: [">=6.1.0"]
     groups:
       react:
         patterns: [react, react-dom, "@types/react", "@types/react-dom"]

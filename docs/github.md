@@ -28,6 +28,21 @@ review their updates manually. Dependabot configuration here covers npm and
 GitHub Actions, not those CMake archives. CI is offline with respect to cards and
 does not replace protocol, cryptographic or physical-hardware qualification.
 
+TypeScript remains pinned to 6.0.3 because `typescript-eslint` 8.73.0 requires
+`>=4.8.4 <6.1.0`. Dependabot leaves TypeScript 6.1+ updates for a coordinated
+compiler/parser update; do not bypass npm's peer-dependency checks to install one.
+
+### Reviewed CodeQL finding
+
+The initial C++ scan reported `cpp/non-https-url` in cpp-httplib 0.67.0's
+`ClientImpl::proxy_target_prefix()` (`build/codeql/_deps/httplib-src/httplib.h`).
+That function constructs the absolute-form target for a plain HTTP proxy in
+upstream client code. This application creates only `httplib::Server`, binds it
+to `127.0.0.1`, and never instantiates an HTTP client or configures an outbound
+proxy. The finding is therefore a false positive for this application's behavior.
+Only that individual alert is dismissed; the query and dependency analysis
+remain enabled. Reassess this decision if outbound HTTP client usage is added.
+
 ## Community
 
 The repository includes issue forms, a PR template, contribution and security
