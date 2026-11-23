@@ -1,0 +1,1802 @@
+{
+  "commands": [
+    {
+      "name": "list_readers",
+      "label": "List readers",
+      "group": "Connection",
+      "protocol": "system",
+      "mutating": false,
+      "fields": []
+    },
+    {
+      "name": "connect",
+      "label": "Connect",
+      "group": "Connection",
+      "protocol": "system",
+      "mutating": false,
+      "fields": [
+        {
+          "name": "reader",
+          "label": "Reader",
+          "type": "text",
+          "default": "",
+          "required": true
+        },
+        {
+          "name": "wait_ms",
+          "label": "Wait ms",
+          "type": "number",
+          "default": "0",
+          "min": 0,
+          "max": 15000
+        }
+      ]
+    },
+    {
+      "name": "disconnect",
+      "label": "Disconnect",
+      "group": "Connection",
+      "protocol": "system",
+      "mutating": false,
+      "fields": []
+    },
+    {
+      "name": "status",
+      "label": "Status",
+      "group": "Connection",
+      "protocol": "system",
+      "mutating": false,
+      "fields": []
+    },
+    {
+      "name": "credential_list",
+      "label": "Credential list",
+      "group": "Credentials",
+      "protocol": "system",
+      "mutating": false,
+      "fields": []
+    },
+    {
+      "name": "credential_add",
+      "label": "Credential add",
+      "group": "Credentials",
+      "protocol": "system",
+      "mutating": false,
+      "fields": [
+        {
+          "name": "name",
+          "label": "Name",
+          "type": "text",
+          "default": "",
+          "required": true
+        },
+        {
+          "name": "aid",
+          "label": "Aid",
+          "type": "hex",
+          "default": "000000",
+          "width": 6,
+          "secret": false,
+          "required": true
+        },
+        {
+          "name": "number",
+          "label": "Number",
+          "type": "number",
+          "default": "0",
+          "min": 0,
+          "max": 13
+        },
+        {
+          "name": "key_type",
+          "label": "Key type",
+          "type": "select",
+          "default": "aes_128",
+          "options": [
+            "aes_128",
+            "des",
+            "tdes_2k",
+            "tdes_3k"
+          ]
+        },
+        {
+          "name": "key",
+          "label": "Key",
+          "type": "hex",
+          "default": "",
+          "width": null,
+          "secret": true,
+          "required": true
+        },
+        {
+          "name": "version",
+          "label": "Version",
+          "type": "hex",
+          "default": "00",
+          "width": 2,
+          "secret": false,
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "credential_remove",
+      "label": "Credential remove",
+      "group": "Credentials",
+      "protocol": "system",
+      "mutating": false,
+      "fields": [
+        {
+          "name": "credential_id",
+          "label": "Credential id",
+          "type": "text",
+          "default": "",
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "init",
+      "label": "Init",
+      "group": "Card",
+      "protocol": "native",
+      "mutating": false,
+      "fields": []
+    },
+    {
+      "name": "get_version",
+      "label": "Get version",
+      "group": "Card",
+      "protocol": "native",
+      "mutating": false,
+      "fields": []
+    },
+    {
+      "name": "free_memory",
+      "label": "Free memory",
+      "group": "Card",
+      "protocol": "native",
+      "mutating": false,
+      "fields": []
+    },
+    {
+      "name": "get_card_uid",
+      "label": "Get card uid",
+      "group": "Card",
+      "protocol": "native",
+      "mutating": false,
+      "fields": []
+    },
+    {
+      "name": "get_application_ids",
+      "label": "Get application ids",
+      "group": "Applications",
+      "protocol": "native",
+      "mutating": false,
+      "fields": []
+    },
+    {
+      "name": "get_df_names",
+      "label": "Get df names",
+      "group": "Applications",
+      "protocol": "native",
+      "mutating": false,
+      "fields": []
+    },
+    {
+      "name": "get_fids",
+      "label": "Get fids",
+      "group": "Files",
+      "protocol": "native",
+      "mutating": false,
+      "fields": []
+    },
+    {
+      "name": "get_iso_fids",
+      "label": "Get iso fids",
+      "group": "Files",
+      "protocol": "native",
+      "mutating": false,
+      "fields": []
+    },
+    {
+      "name": "get_key_settings",
+      "label": "Get key settings",
+      "group": "Keys",
+      "protocol": "native",
+      "mutating": false,
+      "fields": []
+    },
+    {
+      "name": "select_application",
+      "label": "Select application",
+      "group": "Applications",
+      "protocol": "native",
+      "mutating": false,
+      "fields": [
+        {
+          "name": "aid",
+          "label": "Aid",
+          "type": "hex",
+          "default": "000000",
+          "width": 6,
+          "secret": false,
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "create_application",
+      "label": "Create application",
+      "group": "Applications",
+      "protocol": "native",
+      "mutating": true,
+      "fields": [
+        {
+          "name": "aid",
+          "label": "Aid",
+          "type": "hex",
+          "default": "000000",
+          "width": 6,
+          "secret": false,
+          "required": true
+        },
+        {
+          "name": "settings_1",
+          "label": "Settings 1",
+          "type": "hex",
+          "default": "0F",
+          "width": 2,
+          "secret": false,
+          "required": true
+        },
+        {
+          "name": "settings_2",
+          "label": "Settings 2",
+          "type": "hex",
+          "default": "84",
+          "width": 2,
+          "secret": false,
+          "required": true
+        },
+        {
+          "name": "iso_id",
+          "label": "Iso id",
+          "type": "hex",
+          "default": "",
+          "width": 4,
+          "secret": false,
+          "required": false
+        },
+        {
+          "name": "df_name",
+          "label": "Df name",
+          "type": "hex",
+          "default": "",
+          "width": null,
+          "secret": false,
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "delete_application",
+      "label": "Delete application",
+      "group": "Applications",
+      "protocol": "native",
+      "mutating": true,
+      "fields": [
+        {
+          "name": "aid",
+          "label": "Aid",
+          "type": "hex",
+          "default": "000000",
+          "width": 6,
+          "secret": false,
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "format_picc",
+      "label": "Format picc",
+      "group": "Card",
+      "protocol": "native",
+      "mutating": true,
+      "fields": []
+    },
+    {
+      "name": "set_configuration",
+      "label": "Set configuration",
+      "group": "Card",
+      "protocol": "native",
+      "mutating": true,
+      "fields": [
+        {
+          "name": "option",
+          "label": "Option",
+          "type": "hex",
+          "default": "00",
+          "width": 2,
+          "secret": false,
+          "required": true
+        },
+        {
+          "name": "data",
+          "label": "Data",
+          "type": "hex",
+          "default": "",
+          "width": null,
+          "secret": false,
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "get_key_version",
+      "label": "Get key version",
+      "group": "Keys",
+      "protocol": "native",
+      "mutating": false,
+      "fields": [
+        {
+          "name": "number",
+          "label": "Number",
+          "type": "number",
+          "default": "0",
+          "min": 0,
+          "max": 13
+        }
+      ]
+    },
+    {
+      "name": "change_key_settings",
+      "label": "Change key settings",
+      "group": "Keys",
+      "protocol": "native",
+      "mutating": true,
+      "fields": [
+        {
+          "name": "settings",
+          "label": "Settings",
+          "type": "hex",
+          "default": "0F",
+          "width": 2,
+          "secret": false,
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "authenticate",
+      "label": "Authenticate",
+      "group": "Keys",
+      "protocol": "native",
+      "mutating": false,
+      "fields": [
+        {
+          "name": "number",
+          "label": "Number",
+          "type": "number",
+          "default": "0",
+          "min": 0,
+          "max": 13
+        },
+        {
+          "name": "key_type",
+          "label": "Key type",
+          "type": "select",
+          "default": "des",
+          "options": [
+            "des",
+            "tdes_2k"
+          ]
+        },
+        {
+          "name": "credential_id",
+          "label": "Saved key",
+          "type": "text",
+          "default": "",
+          "required": false
+        },
+        {
+          "name": "key",
+          "label": "Key",
+          "type": "hex",
+          "default": "",
+          "width": null,
+          "secret": true,
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "authenticate_iso",
+      "label": "Authenticate iso",
+      "group": "Keys",
+      "protocol": "native",
+      "mutating": false,
+      "fields": [
+        {
+          "name": "number",
+          "label": "Number",
+          "type": "number",
+          "default": "0",
+          "min": 0,
+          "max": 13
+        },
+        {
+          "name": "key_type",
+          "label": "Key type",
+          "type": "select",
+          "default": "tdes_3k",
+          "options": [
+            "des",
+            "tdes_2k",
+            "tdes_3k"
+          ]
+        },
+        {
+          "name": "credential_id",
+          "label": "Saved key",
+          "type": "text",
+          "default": "",
+          "required": false
+        },
+        {
+          "name": "key",
+          "label": "Key",
+          "type": "hex",
+          "default": "",
+          "width": null,
+          "secret": true,
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "authenticate_aes",
+      "label": "Authenticate aes",
+      "group": "Keys",
+      "protocol": "native",
+      "mutating": false,
+      "fields": [
+        {
+          "name": "number",
+          "label": "Number",
+          "type": "number",
+          "default": "0",
+          "min": 0,
+          "max": 13
+        },
+        {
+          "name": "credential_id",
+          "label": "Saved key",
+          "type": "text",
+          "default": "",
+          "required": false
+        },
+        {
+          "name": "key",
+          "label": "Key",
+          "type": "hex",
+          "default": "",
+          "width": null,
+          "secret": true,
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "change_picc_master_key",
+      "label": "Change picc master key",
+      "group": "Keys",
+      "protocol": "native",
+      "mutating": true,
+      "fields": [
+        {
+          "name": "key_type",
+          "label": "Key type",
+          "type": "select",
+          "default": "aes_128",
+          "options": [
+            "aes_128",
+            "des",
+            "tdes_2k",
+            "tdes_3k"
+          ]
+        },
+        {
+          "name": "new_key",
+          "label": "New key",
+          "type": "hex",
+          "default": "",
+          "width": null,
+          "secret": true,
+          "required": true
+        },
+        {
+          "name": "version",
+          "label": "Version",
+          "type": "hex",
+          "default": "00",
+          "width": 2,
+          "secret": false,
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "change_app_key",
+      "label": "Change app key",
+      "group": "Keys",
+      "protocol": "native",
+      "mutating": true,
+      "fields": [
+        {
+          "name": "number",
+          "label": "Number",
+          "type": "number",
+          "default": "0",
+          "min": 0,
+          "max": 13
+        },
+        {
+          "name": "old_type",
+          "label": "Old type",
+          "type": "select",
+          "default": "aes_128",
+          "options": [
+            "aes_128",
+            "des",
+            "tdes_2k",
+            "tdes_3k"
+          ]
+        },
+        {
+          "name": "old_key",
+          "label": "Old key",
+          "type": "hex",
+          "default": "",
+          "width": null,
+          "secret": true,
+          "required": true
+        },
+        {
+          "name": "new_type",
+          "label": "New type",
+          "type": "select",
+          "default": "aes_128",
+          "options": [
+            "aes_128",
+            "des",
+            "tdes_2k",
+            "tdes_3k"
+          ]
+        },
+        {
+          "name": "new_key",
+          "label": "New key",
+          "type": "hex",
+          "default": "",
+          "width": null,
+          "secret": true,
+          "required": true
+        },
+        {
+          "name": "version",
+          "label": "Version",
+          "type": "hex",
+          "default": "00",
+          "width": 2,
+          "secret": false,
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "get_file_settings",
+      "label": "Get file settings",
+      "group": "Files",
+      "protocol": "native",
+      "mutating": false,
+      "fields": [
+        {
+          "name": "file",
+          "label": "File",
+          "type": "number",
+          "default": "0",
+          "min": 0,
+          "max": 31
+        }
+      ]
+    },
+    {
+      "name": "change_file_settings",
+      "label": "Change file settings",
+      "group": "Files",
+      "protocol": "native",
+      "mutating": true,
+      "fields": [
+        {
+          "name": "file",
+          "label": "File",
+          "type": "number",
+          "default": "0",
+          "min": 0,
+          "max": 31
+        },
+        {
+          "name": "mode",
+          "label": "Mode",
+          "type": "select",
+          "default": "plain",
+          "options": [
+            "plain",
+            "mac",
+            "encrypted"
+          ]
+        },
+        {
+          "name": "read",
+          "label": "Read",
+          "type": "number",
+          "default": "14",
+          "min": 0,
+          "max": 15
+        },
+        {
+          "name": "write",
+          "label": "Write",
+          "type": "number",
+          "default": "14",
+          "min": 0,
+          "max": 15
+        },
+        {
+          "name": "read_write",
+          "label": "Read write",
+          "type": "number",
+          "default": "15",
+          "min": 0,
+          "max": 15
+        },
+        {
+          "name": "change",
+          "label": "Change",
+          "type": "number",
+          "default": "0",
+          "min": 0,
+          "max": 15
+        },
+        {
+          "name": "encrypted_command",
+          "label": "Encrypted command",
+          "type": "select",
+          "default": "true",
+          "options": [
+            "true",
+            "false"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "create_std_data_file",
+      "label": "Create std data file",
+      "group": "Files",
+      "protocol": "native",
+      "mutating": true,
+      "fields": [
+        {
+          "name": "file",
+          "label": "File",
+          "type": "number",
+          "default": "0",
+          "min": 0,
+          "max": 31
+        },
+        {
+          "name": "mode",
+          "label": "Mode",
+          "type": "select",
+          "default": "plain",
+          "options": [
+            "plain",
+            "mac",
+            "encrypted"
+          ]
+        },
+        {
+          "name": "size",
+          "label": "Size",
+          "type": "number",
+          "default": "128",
+          "min": 1,
+          "max": 16777215
+        },
+        {
+          "name": "read",
+          "label": "Read",
+          "type": "number",
+          "default": "14",
+          "min": 0,
+          "max": 15
+        },
+        {
+          "name": "write",
+          "label": "Write",
+          "type": "number",
+          "default": "14",
+          "min": 0,
+          "max": 15
+        },
+        {
+          "name": "read_write",
+          "label": "Read write",
+          "type": "number",
+          "default": "15",
+          "min": 0,
+          "max": 15
+        },
+        {
+          "name": "change",
+          "label": "Change",
+          "type": "number",
+          "default": "0",
+          "min": 0,
+          "max": 15
+        },
+        {
+          "name": "iso_id",
+          "label": "Iso id",
+          "type": "hex",
+          "default": "",
+          "width": 4,
+          "secret": false,
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "create_backup_data_file",
+      "label": "Create backup data file",
+      "group": "Files",
+      "protocol": "native",
+      "mutating": true,
+      "fields": [
+        {
+          "name": "file",
+          "label": "File",
+          "type": "number",
+          "default": "0",
+          "min": 0,
+          "max": 31
+        },
+        {
+          "name": "mode",
+          "label": "Mode",
+          "type": "select",
+          "default": "plain",
+          "options": [
+            "plain",
+            "mac",
+            "encrypted"
+          ]
+        },
+        {
+          "name": "size",
+          "label": "Size",
+          "type": "number",
+          "default": "128",
+          "min": 1,
+          "max": 16777215
+        },
+        {
+          "name": "read",
+          "label": "Read",
+          "type": "number",
+          "default": "14",
+          "min": 0,
+          "max": 15
+        },
+        {
+          "name": "write",
+          "label": "Write",
+          "type": "number",
+          "default": "14",
+          "min": 0,
+          "max": 15
+        },
+        {
+          "name": "read_write",
+          "label": "Read write",
+          "type": "number",
+          "default": "15",
+          "min": 0,
+          "max": 15
+        },
+        {
+          "name": "change",
+          "label": "Change",
+          "type": "number",
+          "default": "0",
+          "min": 0,
+          "max": 15
+        },
+        {
+          "name": "iso_id",
+          "label": "Iso id",
+          "type": "hex",
+          "default": "",
+          "width": 4,
+          "secret": false,
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "create_value_file",
+      "label": "Create value file",
+      "group": "Files",
+      "protocol": "native",
+      "mutating": true,
+      "fields": [
+        {
+          "name": "file",
+          "label": "File",
+          "type": "number",
+          "default": "0",
+          "min": 0,
+          "max": 31
+        },
+        {
+          "name": "mode",
+          "label": "Mode",
+          "type": "select",
+          "default": "plain",
+          "options": [
+            "plain",
+            "mac",
+            "encrypted"
+          ]
+        },
+        {
+          "name": "lower_limit",
+          "label": "Lower limit",
+          "type": "number",
+          "default": "0",
+          "min": -2147483648,
+          "max": 2147483647
+        },
+        {
+          "name": "upper_limit",
+          "label": "Upper limit",
+          "type": "number",
+          "default": "100000",
+          "min": -2147483648,
+          "max": 2147483647
+        },
+        {
+          "name": "initial_value",
+          "label": "Initial value",
+          "type": "number",
+          "default": "0",
+          "min": -2147483648,
+          "max": 2147483647
+        },
+        {
+          "name": "limited_credit_enabled",
+          "label": "Limited credit enabled",
+          "type": "select",
+          "default": "false",
+          "options": [
+            "false",
+            "true"
+          ]
+        },
+        {
+          "name": "read",
+          "label": "Read",
+          "type": "number",
+          "default": "14",
+          "min": 0,
+          "max": 15
+        },
+        {
+          "name": "write",
+          "label": "Write",
+          "type": "number",
+          "default": "14",
+          "min": 0,
+          "max": 15
+        },
+        {
+          "name": "read_write",
+          "label": "Read write",
+          "type": "number",
+          "default": "15",
+          "min": 0,
+          "max": 15
+        },
+        {
+          "name": "change",
+          "label": "Change",
+          "type": "number",
+          "default": "0",
+          "min": 0,
+          "max": 15
+        }
+      ]
+    },
+    {
+      "name": "create_linear_record_file",
+      "label": "Create linear record file",
+      "group": "Files",
+      "protocol": "native",
+      "mutating": true,
+      "fields": [
+        {
+          "name": "file",
+          "label": "File",
+          "type": "number",
+          "default": "0",
+          "min": 0,
+          "max": 31
+        },
+        {
+          "name": "mode",
+          "label": "Mode",
+          "type": "select",
+          "default": "plain",
+          "options": [
+            "plain",
+            "mac",
+            "encrypted"
+          ]
+        },
+        {
+          "name": "record_size",
+          "label": "Record size",
+          "type": "number",
+          "default": "32",
+          "min": 1,
+          "max": 16777215
+        },
+        {
+          "name": "max_records",
+          "label": "Max records",
+          "type": "number",
+          "default": "10",
+          "min": 1,
+          "max": 16777215
+        },
+        {
+          "name": "read",
+          "label": "Read",
+          "type": "number",
+          "default": "14",
+          "min": 0,
+          "max": 15
+        },
+        {
+          "name": "write",
+          "label": "Write",
+          "type": "number",
+          "default": "14",
+          "min": 0,
+          "max": 15
+        },
+        {
+          "name": "read_write",
+          "label": "Read write",
+          "type": "number",
+          "default": "15",
+          "min": 0,
+          "max": 15
+        },
+        {
+          "name": "change",
+          "label": "Change",
+          "type": "number",
+          "default": "0",
+          "min": 0,
+          "max": 15
+        },
+        {
+          "name": "iso_id",
+          "label": "Iso id",
+          "type": "hex",
+          "default": "",
+          "width": 4,
+          "secret": false,
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "create_cyclic_record_file",
+      "label": "Create cyclic record file",
+      "group": "Files",
+      "protocol": "native",
+      "mutating": true,
+      "fields": [
+        {
+          "name": "file",
+          "label": "File",
+          "type": "number",
+          "default": "0",
+          "min": 0,
+          "max": 31
+        },
+        {
+          "name": "mode",
+          "label": "Mode",
+          "type": "select",
+          "default": "plain",
+          "options": [
+            "plain",
+            "mac",
+            "encrypted"
+          ]
+        },
+        {
+          "name": "record_size",
+          "label": "Record size",
+          "type": "number",
+          "default": "32",
+          "min": 1,
+          "max": 16777215
+        },
+        {
+          "name": "max_records",
+          "label": "Max records",
+          "type": "number",
+          "default": "10",
+          "min": 1,
+          "max": 16777215
+        },
+        {
+          "name": "read",
+          "label": "Read",
+          "type": "number",
+          "default": "14",
+          "min": 0,
+          "max": 15
+        },
+        {
+          "name": "write",
+          "label": "Write",
+          "type": "number",
+          "default": "14",
+          "min": 0,
+          "max": 15
+        },
+        {
+          "name": "read_write",
+          "label": "Read write",
+          "type": "number",
+          "default": "15",
+          "min": 0,
+          "max": 15
+        },
+        {
+          "name": "change",
+          "label": "Change",
+          "type": "number",
+          "default": "0",
+          "min": 0,
+          "max": 15
+        },
+        {
+          "name": "iso_id",
+          "label": "Iso id",
+          "type": "hex",
+          "default": "",
+          "width": 4,
+          "secret": false,
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "delete_file",
+      "label": "Delete file",
+      "group": "Files",
+      "protocol": "native",
+      "mutating": true,
+      "fields": [
+        {
+          "name": "file",
+          "label": "File",
+          "type": "number",
+          "default": "0",
+          "min": 0,
+          "max": 31
+        }
+      ]
+    },
+    {
+      "name": "read_data",
+      "label": "Read data",
+      "group": "Data",
+      "protocol": "native",
+      "mutating": false,
+      "fields": [
+        {
+          "name": "file",
+          "label": "File",
+          "type": "number",
+          "default": "0",
+          "min": 0,
+          "max": 31
+        },
+        {
+          "name": "mode",
+          "label": "Mode",
+          "type": "select",
+          "default": "plain",
+          "options": [
+            "plain",
+            "mac",
+            "encrypted"
+          ]
+        },
+        {
+          "name": "offset",
+          "label": "Offset",
+          "type": "number",
+          "default": "0",
+          "min": 0,
+          "max": 16777215
+        },
+        {
+          "name": "length",
+          "label": "Length",
+          "type": "number",
+          "default": "16",
+          "min": 0,
+          "max": 16777215
+        }
+      ]
+    },
+    {
+      "name": "write_data",
+      "label": "Write data",
+      "group": "Data",
+      "protocol": "native",
+      "mutating": true,
+      "fields": [
+        {
+          "name": "file",
+          "label": "File",
+          "type": "number",
+          "default": "0",
+          "min": 0,
+          "max": 31
+        },
+        {
+          "name": "mode",
+          "label": "Mode",
+          "type": "select",
+          "default": "plain",
+          "options": [
+            "plain",
+            "mac",
+            "encrypted"
+          ]
+        },
+        {
+          "name": "offset",
+          "label": "Offset",
+          "type": "number",
+          "default": "0",
+          "min": 0,
+          "max": 16777215
+        },
+        {
+          "name": "data",
+          "label": "Data",
+          "type": "hex",
+          "default": "",
+          "width": null,
+          "secret": false,
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "get_value",
+      "label": "Get value",
+      "group": "Values",
+      "protocol": "native",
+      "mutating": false,
+      "fields": [
+        {
+          "name": "file",
+          "label": "File",
+          "type": "number",
+          "default": "0",
+          "min": 0,
+          "max": 31
+        },
+        {
+          "name": "mode",
+          "label": "Mode",
+          "type": "select",
+          "default": "plain",
+          "options": [
+            "plain",
+            "mac",
+            "encrypted"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "credit",
+      "label": "Credit",
+      "group": "Values",
+      "protocol": "native",
+      "mutating": true,
+      "fields": [
+        {
+          "name": "file",
+          "label": "File",
+          "type": "number",
+          "default": "0",
+          "min": 0,
+          "max": 31
+        },
+        {
+          "name": "mode",
+          "label": "Mode",
+          "type": "select",
+          "default": "plain",
+          "options": [
+            "plain",
+            "mac",
+            "encrypted"
+          ]
+        },
+        {
+          "name": "amount",
+          "label": "Amount",
+          "type": "number",
+          "default": "1",
+          "min": 1,
+          "max": 2147483647
+        }
+      ]
+    },
+    {
+      "name": "debit",
+      "label": "Debit",
+      "group": "Values",
+      "protocol": "native",
+      "mutating": true,
+      "fields": [
+        {
+          "name": "file",
+          "label": "File",
+          "type": "number",
+          "default": "0",
+          "min": 0,
+          "max": 31
+        },
+        {
+          "name": "mode",
+          "label": "Mode",
+          "type": "select",
+          "default": "plain",
+          "options": [
+            "plain",
+            "mac",
+            "encrypted"
+          ]
+        },
+        {
+          "name": "amount",
+          "label": "Amount",
+          "type": "number",
+          "default": "1",
+          "min": 1,
+          "max": 2147483647
+        }
+      ]
+    },
+    {
+      "name": "limited_credit",
+      "label": "Limited credit",
+      "group": "Values",
+      "protocol": "native",
+      "mutating": true,
+      "fields": [
+        {
+          "name": "file",
+          "label": "File",
+          "type": "number",
+          "default": "0",
+          "min": 0,
+          "max": 31
+        },
+        {
+          "name": "mode",
+          "label": "Mode",
+          "type": "select",
+          "default": "plain",
+          "options": [
+            "plain",
+            "mac",
+            "encrypted"
+          ]
+        },
+        {
+          "name": "amount",
+          "label": "Amount",
+          "type": "number",
+          "default": "1",
+          "min": 1,
+          "max": 2147483647
+        }
+      ]
+    },
+    {
+      "name": "read_records",
+      "label": "Read records",
+      "group": "Records",
+      "protocol": "native",
+      "mutating": false,
+      "fields": [
+        {
+          "name": "file",
+          "label": "File",
+          "type": "number",
+          "default": "0",
+          "min": 0,
+          "max": 31
+        },
+        {
+          "name": "mode",
+          "label": "Mode",
+          "type": "select",
+          "default": "plain",
+          "options": [
+            "plain",
+            "mac",
+            "encrypted"
+          ]
+        },
+        {
+          "name": "offset",
+          "label": "Offset",
+          "type": "number",
+          "default": "0",
+          "min": 0,
+          "max": 16777215
+        },
+        {
+          "name": "count",
+          "label": "Count",
+          "type": "number",
+          "default": "1",
+          "min": 0,
+          "max": 16777215
+        },
+        {
+          "name": "record_size",
+          "label": "Record size",
+          "type": "number",
+          "default": "32",
+          "min": 1,
+          "max": 16777215
+        }
+      ]
+    },
+    {
+      "name": "write_record",
+      "label": "Write record",
+      "group": "Records",
+      "protocol": "native",
+      "mutating": true,
+      "fields": [
+        {
+          "name": "file",
+          "label": "File",
+          "type": "number",
+          "default": "0",
+          "min": 0,
+          "max": 31
+        },
+        {
+          "name": "mode",
+          "label": "Mode",
+          "type": "select",
+          "default": "plain",
+          "options": [
+            "plain",
+            "mac",
+            "encrypted"
+          ]
+        },
+        {
+          "name": "offset",
+          "label": "Offset",
+          "type": "number",
+          "default": "0",
+          "min": 0,
+          "max": 16777215
+        },
+        {
+          "name": "data",
+          "label": "Data",
+          "type": "hex",
+          "default": "",
+          "width": null,
+          "secret": false,
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "clear_record_file",
+      "label": "Clear record file",
+      "group": "Records",
+      "protocol": "native",
+      "mutating": true,
+      "fields": [
+        {
+          "name": "file",
+          "label": "File",
+          "type": "number",
+          "default": "0",
+          "min": 0,
+          "max": 31
+        }
+      ]
+    },
+    {
+      "name": "commit_transaction",
+      "label": "Commit transaction",
+      "group": "Transactions",
+      "protocol": "native",
+      "mutating": true,
+      "fields": []
+    },
+    {
+      "name": "abort_transaction",
+      "label": "Abort transaction",
+      "group": "Transactions",
+      "protocol": "native",
+      "mutating": true,
+      "fields": []
+    },
+    {
+      "name": "iso7816_select_master_file",
+      "label": "Select master file",
+      "group": "Selection",
+      "protocol": "iso7816",
+      "mutating": false,
+      "fields": [
+        {
+          "name": "response",
+          "label": "Response",
+          "type": "select",
+          "default": "none",
+          "options": [
+            "none",
+            "fci"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "iso7816_select_file",
+      "label": "Select file",
+      "group": "Selection",
+      "protocol": "iso7816",
+      "mutating": false,
+      "fields": [
+        {
+          "name": "identifier",
+          "label": "Identifier",
+          "type": "hex",
+          "default": "0001",
+          "width": 4,
+          "secret": false,
+          "required": true
+        },
+        {
+          "name": "scope",
+          "label": "Scope",
+          "type": "select",
+          "default": "application_df",
+          "options": [
+            "application_df",
+            "elementary_file"
+          ]
+        },
+        {
+          "name": "response",
+          "label": "Response",
+          "type": "select",
+          "default": "none",
+          "options": [
+            "none",
+            "fci"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "iso7816_select_by_df_name",
+      "label": "Select by df name",
+      "group": "Selection",
+      "protocol": "iso7816",
+      "mutating": false,
+      "fields": [
+        {
+          "name": "name",
+          "label": "Name",
+          "type": "hex",
+          "default": "",
+          "width": null,
+          "secret": false,
+          "required": true
+        },
+        {
+          "name": "response",
+          "label": "Response",
+          "type": "select",
+          "default": "none",
+          "options": [
+            "none",
+            "fci"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "iso7816_read_binary",
+      "label": "Read binary",
+      "group": "Binary",
+      "protocol": "iso7816",
+      "mutating": false,
+      "fields": [
+        {
+          "name": "offset",
+          "label": "Offset",
+          "type": "number",
+          "default": "0",
+          "min": 0,
+          "max": 32767
+        },
+        {
+          "name": "short_file_id",
+          "label": "Short file id",
+          "type": "number",
+          "default": "",
+          "min": 1,
+          "max": 30,
+          "required": false
+        },
+        {
+          "name": "length",
+          "label": "Length",
+          "type": "number",
+          "default": "16",
+          "min": 1,
+          "max": 256
+        }
+      ]
+    },
+    {
+      "name": "iso7816_update_binary",
+      "label": "Update binary",
+      "group": "Binary",
+      "protocol": "iso7816",
+      "mutating": true,
+      "fields": [
+        {
+          "name": "offset",
+          "label": "Offset",
+          "type": "number",
+          "default": "0",
+          "min": 0,
+          "max": 32767
+        },
+        {
+          "name": "short_file_id",
+          "label": "Short file id",
+          "type": "number",
+          "default": "",
+          "min": 1,
+          "max": 30,
+          "required": false
+        },
+        {
+          "name": "data",
+          "label": "Data",
+          "type": "hex",
+          "default": "",
+          "width": null,
+          "secret": false,
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "iso7816_read_records",
+      "label": "Read records",
+      "group": "Records",
+      "protocol": "iso7816",
+      "mutating": false,
+      "fields": [
+        {
+          "name": "short_file_id",
+          "label": "Short file id",
+          "type": "number",
+          "default": "",
+          "min": 1,
+          "max": 30,
+          "required": false
+        },
+        {
+          "name": "record_number",
+          "label": "Record number",
+          "type": "number",
+          "default": "1",
+          "min": 1,
+          "max": 254
+        },
+        {
+          "name": "record_mode",
+          "label": "Record mode",
+          "type": "select",
+          "default": "absolute",
+          "options": [
+            "absolute",
+            "forward"
+          ]
+        },
+        {
+          "name": "length",
+          "label": "Length",
+          "type": "number",
+          "default": "32",
+          "min": 1,
+          "max": 256
+        }
+      ]
+    },
+    {
+      "name": "iso7816_append_record",
+      "label": "Append record",
+      "group": "Records",
+      "protocol": "iso7816",
+      "mutating": true,
+      "fields": [
+        {
+          "name": "short_file_id",
+          "label": "Short file id",
+          "type": "number",
+          "default": "",
+          "min": 1,
+          "max": 30,
+          "required": false
+        },
+        {
+          "name": "data",
+          "label": "Data",
+          "type": "hex",
+          "default": "",
+          "width": null,
+          "secret": false,
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "iso7816_get_challenge",
+      "label": "Get challenge",
+      "group": "Authentication",
+      "protocol": "iso7816",
+      "mutating": false,
+      "fields": [
+        {
+          "name": "key_type",
+          "label": "Key type",
+          "type": "select",
+          "default": "aes_128",
+          "options": [
+            "aes_128",
+            "des",
+            "tdes_2k",
+            "tdes_3k"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "iso7816_authenticate",
+      "label": "Authenticate",
+      "group": "Authentication",
+      "protocol": "iso7816",
+      "mutating": false,
+      "fields": [
+        {
+          "name": "number",
+          "label": "Number",
+          "type": "number",
+          "default": "0",
+          "min": 0,
+          "max": 13
+        },
+        {
+          "name": "key_type",
+          "label": "Key type",
+          "type": "select",
+          "default": "aes_128",
+          "options": [
+            "aes_128",
+            "des",
+            "tdes_2k",
+            "tdes_3k"
+          ]
+        },
+        {
+          "name": "credential_id",
+          "label": "Saved key",
+          "type": "text",
+          "default": "",
+          "required": false
+        },
+        {
+          "name": "key",
+          "label": "Key",
+          "type": "hex",
+          "default": "",
+          "width": null,
+          "secret": true,
+          "required": false
+        }
+      ]
+    },
+    {
+      "name": "raw_apdu",
+      "label": "Raw APDU",
+      "group": "Raw",
+      "protocol": "raw",
+      "mutating": true,
+      "fields": [
+        {
+          "name": "data",
+          "label": "Data",
+          "type": "hex",
+          "default": "",
+          "width": null,
+          "secret": false,
+          "required": true
+        }
+      ]
+    },
+    {
+      "name": "raw_native",
+      "label": "Raw native frame",
+      "group": "Raw",
+      "protocol": "raw",
+      "mutating": true,
+      "fields": [
+        {
+          "name": "data",
+          "label": "Data",
+          "type": "hex",
+          "default": "",
+          "width": null,
+          "secret": false,
+          "required": true
+        }
+      ]
+    }
+  ]
+}

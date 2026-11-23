@@ -1,0 +1,9 @@
+/// @file
+/// @brief Application resources generated from the shared command catalog.
+#include "dashboard_resources.hpp"
+
+namespace desfire_console {
+  std::string_view command_catalog_resource() noexcept {
+    return R"desfire_catalog(@DESFIRE_COMMAND_CATALOG@)desfire_catalog";
+  }
+}

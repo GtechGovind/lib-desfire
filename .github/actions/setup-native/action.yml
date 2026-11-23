@@ -1,0 +1,25 @@
+name: Set up native dependencies
+description: Locate OpenSSL on GitHub-hosted Linux, macOS and Windows runners.
+runs:
+  using: composite
+  steps:
+    - if: runner.os == 'Linux'
+      shell: bash
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libssl-dev
+        echo 'OPENSSL_ROOT_DIR=/usr' >> "$GITHUB_ENV"
+    - if: runner.os == 'macOS'
+      shell: bash
+      run: |
+        brew list openssl@3 >/dev/null 2>&1 || brew install openssl@3
+        echo "OPENSSL_ROOT_DIR=$(brew --prefix openssl@3)" >> "$GITHUB_ENV"
+    - if: runner.os == 'Windows'
+      shell: pwsh
+      run: |
+        $opensslRoot = 'C:/Program Files/OpenSSL'
+        if (!(Test-Path "$opensslRoot/include/openssl/ssl.h")) {
+          throw 'The runner OpenSSL installation was not found.'
+        }
+        "OPENSSL_ROOT_DIR=$opensslRoot" >> $env:GITHUB_ENV
+        "$opensslRoot/bin" >> $env:GITHUB_PATH

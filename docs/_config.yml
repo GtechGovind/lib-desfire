@@ -1,0 +1,12 @@
+title: lib-desfire
+description: Portable C++17 DESFire core and native Windows card console.
+theme: jekyll-theme-cayman
+url: https://gtechgovind.github.io
+baseurl: /lib-desfire
+github:
+  repository_url: https://github.com/GtechGovind/lib-desfire
+  is_project_page: true
+show_downloads: false
+plugins:
+  - jekyll-relative-links
+exclude: [release-notes-drafts]

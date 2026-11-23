@@ -1,0 +1,38 @@
+{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "core",
+      "displayName": "Core library",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/build/core",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_EXPORT_COMPILE_COMMANDS": true,
+        "lib_desfire_build_dashboard": false
+      }
+    },
+    {
+      "name": "windows_dashboard",
+      "displayName": "Windows dashboard",
+      "inherits": "core",
+      "binaryDir": "${sourceDir}/build/native_dashboard",
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      },
+      "cacheVariables": {
+        "lib_desfire_build_dashboard": true
+      }
+    }
+  ],
+  "buildPresets": [
+    {"name": "core", "configurePreset": "core"},
+    {
+      "name": "windows_dashboard",
+      "configurePreset": "windows_dashboard",
+      "targets": ["desfire_dashboard_assets"]
+    }
+  ]
+}

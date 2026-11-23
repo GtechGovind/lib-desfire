@@ -1,0 +1,62 @@
+name: CodeQL
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  schedule:
+    - cron: '23 4 * * 2'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: codeql-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  analyze:
+    name: Analyze / ${{ matrix.language }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - language: c-cpp
+            os: windows-latest
+            build-mode: manual
+          - language: javascript-typescript
+            os: ubuntu-latest
+            build-mode: none
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 35
+    permissions:
+      contents: read
+      security-events: write
+      packages: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: github/codeql-action/init@1bd86f2fdb4b86187fa4059f16f31a3202acc9ea # v4
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.build-mode }}
+      - if: matrix.language == 'c-cpp'
+        uses: ./.github/actions/setup-native
+      - if: matrix.language == 'c-cpp'
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+          package-manager-cache: false
+      - name: Build core and Windows application for analysis
+        if: matrix.language == 'c-cpp'
+        shell: pwsh
+        run: |
+          cmake -S . -B build/codeql -Dlib_desfire_build_dashboard=ON "-DOPENSSL_ROOT_DIR=$env:OPENSSL_ROOT_DIR"
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          cmake --build build/codeql --config Release --parallel 2
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+      - uses: github/codeql-action/analyze@1bd86f2fdb4b86187fa4059f16f31a3202acc9ea # v4
+        with:
+          category: /language:${{ matrix.language }}

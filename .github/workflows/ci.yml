@@ -1,0 +1,106 @@
+name: CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  core:
+    name: Core / ${{ matrix.os }} / shared=${{ matrix.shared }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        shared: ["OFF", "ON"]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-native
+      - name: Configure
+        run: >-
+          cmake -S . -B build/ci -DCMAKE_BUILD_TYPE=Release
+          -DOPENSSL_ROOT_DIR="$OPENSSL_ROOT_DIR"
+          -Dlib_desfire_build_shared=${{ matrix.shared }}
+          -DCMAKE_INSTALL_LIBDIR=lib
+      - name: Build and install
+        run: |
+          cmake --build build/ci --config Release --parallel 2
+          cmake --install build/ci --config Release --prefix "$GITHUB_WORKSPACE/install"
+      - name: Build installed-package consumer
+        run: |
+          cmake -S examples/consumer -B build/consumer -DCMAKE_BUILD_TYPE=Release -DCMAKE_PREFIX_PATH="$GITHUB_WORKSPACE/install" -DOPENSSL_ROOT_DIR="$OPENSSL_ROOT_DIR"
+          cmake --build build/consumer --config Release --parallel 2
+      - name: Check installed package without a reader
+        run: |
+          export PATH="$PWD/install/bin:$PATH"
+          export LD_LIBRARY_PATH="$PWD/install/lib:${LD_LIBRARY_PATH:-}"
+          export DYLD_LIBRARY_PATH="$PWD/install/lib:${DYLD_LIBRARY_PATH:-}"
+          ctest --test-dir build/consumer -C Release --output-on-failure
+
+  frontend:
+    name: Frontend
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: src/dashboard/frontend
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: src/dashboard/frontend/package-lock.json
+      - run: npm ci
+      - run: npm run build
+      - run: npm run lint
+      - run: npm run format:check
+
+  dashboard:
+    name: Windows dashboard
+    runs-on: windows-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: ./.github/actions/setup-native
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: src/dashboard/frontend/package-lock.json
+      - name: Configure and build
+        shell: pwsh
+        run: |
+          cmake -S . -B build/dashboard -Dlib_desfire_build_dashboard=ON "-DOPENSSL_ROOT_DIR=$env:OPENSSL_ROOT_DIR"
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          cmake --build build/dashboard --config Release --parallel 2
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          cmake --install build/dashboard --config Release --prefix install
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          ./install/bin/desfire_dashboard.exe --help
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          if (!(Test-Path install/bin/web/index.html)) { throw 'Web assets missing' }
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: windows-dashboard-build
+          path: install/
+          if-no-files-found: error
+          retention-days: 14

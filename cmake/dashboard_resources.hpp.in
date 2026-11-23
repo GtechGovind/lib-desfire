@@ -1,0 +1,10 @@
+/// @file
+/// @brief Read-only command catalog embedded in the native application.
+#pragma once
+
+#include <string_view>
+
+namespace desfire_console {
+  /// Borrow the immutable catalog for the lifetime of the process.
+  std::string_view command_catalog_resource() noexcept;
+}

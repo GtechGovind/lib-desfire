@@ -1,0 +1,24 @@
+BasedOnStyle: LLVM
+IndentWidth: 2
+ContinuationIndentWidth: 2
+NamespaceIndentation: All
+FixNamespaceComments: false
+AccessModifierOffset: -2
+ColumnLimit: 100
+BreakBeforeBraces: Attach
+AllowShortFunctionsOnASingleLine: Inline
+AllowShortIfStatementsOnASingleLine: Never
+AllowShortLoopsOnASingleLine: false
+AllowShortBlocksOnASingleLine: Never
+AllowShortLambdasOnASingleLine: None
+InsertBraces: true
+EmptyLineBeforeAccessModifier: Always
+EmptyLineAfterAccessModifier: Always
+BinPackParameters: AlwaysOnePerLine
+BinPackArguments: false
+AlignAfterOpenBracket: BlockIndent
+SeparateDefinitionBlocks: Always
+PointerAlignment: Right
+ReferenceAlignment: Pointer
+SortIncludes: CaseSensitive
+CommentPragmas: '^ ?(IWYU pragma:|NOLINT|noinspection)'

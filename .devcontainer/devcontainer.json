@@ -1,0 +1,11 @@
+{
+  "name": "lib-desfire core",
+  "image": "mcr.microsoft.com/devcontainers/cpp:1-ubuntu-24.04",
+  "remoteUser": "vscode",
+  "postCreateCommand": "sudo apt-get update && sudo apt-get install -y libssl-dev && cmake -S . -B build/codespaces -DCMAKE_BUILD_TYPE=Debug && cmake --build build/codespaces --parallel 2",
+  "customizations": {
+    "vscode": {
+      "extensions": ["ms-vscode.cmake-tools", "ms-vscode.cpptools"]
+    }
+  }
+}

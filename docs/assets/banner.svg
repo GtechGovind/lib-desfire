@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="360" viewBox="0 0 1280 360" role="img" aria-labelledby="title desc">
+  <title id="title">lib-desfire</title>
+  <desc id="desc">Portable protocol. Local control. C++17 DESFire core and native Windows console.</desc>
+  <defs>
+    <linearGradient id="bg" x2="1" y2="1"><stop stop-color="#071522"/><stop offset="1" stop-color="#112d3b"/></linearGradient>
+    <linearGradient id="card" x2="1" y2="1"><stop stop-color="#153d4a"/><stop offset="1" stop-color="#0b2436"/></linearGradient>
+    <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M40 0H0V40" fill="none" stroke="#73d8d0" stroke-opacity=".07"/></pattern>
+  </defs>
+  <rect width="1280" height="360" rx="20" fill="url(#bg)"/>
+  <rect width="1280" height="360" rx="20" fill="url(#grid)"/>
+  <rect x="64" y="62" width="6" height="32" rx="3" fill="#63e6be"/>
+  <g font-family="Segoe UI,Arial,sans-serif">
+    <text x="88" y="85" fill="#63e6be" font-size="17" font-weight="600" letter-spacing="3">OPEN SOURCE / C++17</text>
+    <text x="60" y="172" fill="#f1f7fb" font-size="76" font-weight="700" letter-spacing="-3">lib-desfire</text>
+    <text x="64" y="221" fill="#b6d4df" font-size="27">Portable protocol. Local control.</text>
+    <text x="64" y="291" fill="#7aa4b8" font-size="17">DES · TDES · AES</text>
+    <circle cx="251" cy="285" r="3" fill="#63e6be"/>
+    <text x="271" y="291" fill="#7aa4b8" font-size="17">ISO 7816</text>
+    <circle cx="377" cy="285" r="3" fill="#63e6be"/>
+    <text x="397" y="291" fill="#7aa4b8" font-size="17">PC/SC CONSOLE</text>
+  </g>
+  <g transform="translate(883 59) rotate(9 132 120)">
+    <rect width="264" height="176" x="-12" y="23" rx="19" fill="#63e6be" opacity=".08"/>
+    <rect width="264" height="176" rx="19" fill="url(#card)" stroke="#63e6be" stroke-opacity=".5"/>
+    <rect x="27" y="30" width="43" height="35" rx="7" fill="#63e6be" opacity=".9"/>
+    <path d="M42 30v35M55 30v35M27 47h43" stroke="#153d4a" stroke-width="2"/>
+    <g fill="none" stroke="#63e6be" stroke-width="4" stroke-linecap="round">
+      <path d="M192 49q18 18 0 36M207 37q30 30 0 60M222 25q42 42 0 84"/>
+    </g>
+    <path d="M29 117h98M29 133h58" stroke="#83b3c6" stroke-width="6" stroke-linecap="round" opacity=".5"/>
+    <text x="165" y="146" font-family="Segoe UI,Arial,sans-serif" font-size="13" fill="#b6d4df" letter-spacing="2">DESFIRE</text>
+  </g>
+  <path d="M830 277h340" stroke="#63e6be" stroke-opacity=".25"/>
+  <text x="880" y="310" font-family="Consolas,monospace" font-size="15" fill="#63e6be">your reader → your transport</text>
+</svg>
