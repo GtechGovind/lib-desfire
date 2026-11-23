@@ -5,14 +5,60 @@ title: release
 
 # Release checks
 
-## Automated source releases
+## Release workflow
 
-Update the version in `CMakeLists.txt`, complete the checks below, then push a
-matching version tag, for example `git tag v0.2.0` followed by
-`git push origin v0.2.0`. The source-release workflow builds the core, verifies
-the installed consumer and creates a **draft** GitHub Release with a CPack source
-ZIP, SHA-256 checksums and generated notes. Review the draft before publishing.
-No version tag or published release is created by an ordinary branch push.
+The **Release** workflow produces three archives and `SHA256SUMS`:
+
+- `lib-desfire-X.Y.Z-source.zip` and `lib-desfire-X.Y.Z-source.tar.gz`: tracked
+  source with a top-level directory, including documentation and the frontend lockfile.
+- `lib-desfire-X.Y.Z-windows-x64.zip`: the native dashboard, web assets, matching
+  OpenSSL Crypto/legacy provider, dependency licenses, setup guide and a signed
+  Microsoft Visual C++ x64 runtime installer. `BUILD-INFO.json` records the source
+  commit, dependency version and hashes of bundled files.
+
+The application binary is unsigned. Its automated checks do not imply hardware
+certification or coverage of every card/reader combination.
+
+### Test packaging without creating a release
+
+Open **Actions → Release → Run workflow**, select a branch, leave `tag` blank
+and leave `create_draft` unchecked. Alternatively:
+
+```sh
+gh workflow run release.yml --ref main -f create_draft=false
+```
+
+The workflow builds the source extracted from its archive, runs the installed
+consumer check, builds the Windows dashboard, checks frontend lint/formatting,
+verifies providers and starts the extracted ZIP to check its web assets.
+It never connects to a card. Download **release-files** from the workflow's
+artifacts; this contains all archives and checksums. No tag or release is created.
+
+### Create a draft release
+
+1. Update `CMakeLists.txt` to the intended stable `X.Y.Z` version and push the
+   commit to `main`. Complete the checks below and wait for CI and CodeQL to pass.
+2. Create and push the matching tag, for example:
+
+   ```sh
+   git tag -a v0.2.0 -m "Release v0.2.0"
+   git push origin v0.2.0
+   ```
+
+3. The workflow checks tag/version equality, main-branch ancestry and successful
+   CI/CodeQL on that exact commit, then packages the release and creates a **draft**
+   with generated release notes. Inspect it before publishing.
+
+To create or retry a draft manually, select an **existing** tag in the `tag`
+input and check `create_draft`, or run:
+
+```sh
+gh workflow run release.yml --ref main -f tag=v0.2.0 -f create_draft=true
+```
+
+Existing draft assets can be refreshed on a retry. Published releases are never
+modified by this workflow. Stable `vX.Y.Z` tags are required; prerelease tags are
+not supported. Ordinary branch pushes do not create a release.
 
 ## Source distribution
 

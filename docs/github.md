@@ -16,7 +16,7 @@ title: GitHub features
 | Dependency review | `.github/workflows/dependency-review.yml` | Reject newly introduced high/critical vulnerabilities in supported dependency changes |
 | Dependabot | `.github/dependabot.yml` | Weekly npm and SHA-pinned GitHub Actions update PRs |
 | Documentation | `.github/workflows/pages.yml` | Build this documentation with Jekyll and deploy through GitHub Pages |
-| Draft source releases | `.github/workflows/release.yml` | Version-tag check, core/consumer build, CPack ZIP, SHA-256 checksums and generated release notes |
+| Releases | `.github/workflows/release.yml` | Source ZIP/tar.gz, Windows dashboard ZIP, checksums, manual package tests and tag-triggered draft releases |
 
 Workflows default to read-only repository access. Security uploads, Pages
 deployment and draft releases receive only the additional permissions they need.
@@ -76,7 +76,9 @@ create payment tiers.
 
 ## Release procedure
 
-Follow [release checks](release.md). Push a tag matching `CMakeLists.txt`, such as
-`v0.2.0`, to produce a **draft** source release. Inspect its archive, checksums,
-generated notes and hardware coverage before publishing it. The workflow does
-not publish unqualified Windows binaries.
+Follow [release checks](release.md). Test packaging from **Actions → Release**
+without creating a tag or release, or push a tag matching `CMakeLists.txt`, such
+as `v0.2.0`, to produce a **draft** source and Windows dashboard release. The
+tagged commit must belong to `main` and have successful CI and CodeQL checks.
+Inspect the packages, checksums, generated notes and hardware coverage before
+publishing. Release automation never runs persistent card operations.

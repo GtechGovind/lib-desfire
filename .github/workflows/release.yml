@@ -1,42 +1,281 @@
-name: Source release
+name: Release
 on:
   push:
-    tags: ['v[0-9]*.[0-9]*.[0-9]*']
+    tags: ['v*']
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing vX.Y.Z tag; leave blank to test the selected branch'
+        type: string
+        required: false
+      create_draft:
+        description: 'Create/update a draft release (requires an existing tag and green main CI/CodeQL)'
+        type: boolean
+        default: false
 
 permissions:
   contents: read
 
+concurrency:
+  group: release-${{ inputs.tag || (github.ref_type == 'tag' && github.ref_name) || github.ref }}
+  cancel-in-progress: false
+
 jobs:
-  source:
+  validate:
+    name: Validate release target
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 5
     permissions:
-      contents: write
+      contents: read
+      actions: read
+    outputs:
+      tag: ${{ steps.target.outputs.tag }}
+      version: ${{ steps.target.outputs.version }}
+      sha: ${{ steps.target.outputs.sha }}
+      publish: ${{ steps.target.outputs.publish }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ inputs.tag && format('refs/tags/{0}', inputs.tag) || github.ref }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Check version, ancestry and required checks
+        id: target
+        env:
+          REQUESTED_TAG: ${{ inputs.tag || (github.ref_type == 'tag' && github.ref_name) || '' }}
+          CREATE_DRAFT: ${{ github.event_name == 'push' || inputs.create_draft }}
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        shell: python
+        run: |
+          import json, os, pathlib, re, subprocess
+          def git(*args):
+              return subprocess.check_output(["git", *args], text=True).strip()
+          match = re.search(r"project\(lib_desfire VERSION (\d+\.\d+\.\d+)\s", pathlib.Path("CMakeLists.txt").read_text())
+          if not match:
+              raise SystemExit("Could not read the CMake project version.")
+          version = match[1]
+          requested = os.environ["REQUESTED_TAG"]
+          tag = requested or f"v{version}"
+          if not re.fullmatch(r"v(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)", tag) or tag != f"v{version}":
+              raise SystemExit("Use a stable vX.Y.Z tag matching CMakeLists.txt.")
+          sha = git("rev-parse", "HEAD")
+          publish = os.environ["CREATE_DRAFT"] == "true"
+          if publish:
+              if not requested:
+                  raise SystemExit("Creating a draft requires an existing tag.")
+              if git("rev-parse", f"refs/tags/{tag}^{{commit}}") != sha:
+                  raise SystemExit("The tag does not match the checked-out commit.")
+              subprocess.run(["git", "merge-base", "--is-ancestor", sha, "origin/main"], check=True)
+              runs = json.loads(subprocess.check_output([
+                  "gh", "run", "list", "--commit", sha, "--branch", "main", "--event", "push",
+                  "--limit", "100", "--json", "workflowName,status,conclusion"
+              ], text=True))
+              for workflow in ("CI", "CodeQL"):
+                  latest = next((r for r in runs if r["workflowName"] == workflow), None)
+                  if not latest or latest["status"] != "completed" or latest["conclusion"] != "success":
+                      raise SystemExit(f"{workflow} must pass on the tagged main-branch commit first.")
+          with open(os.environ["GITHUB_OUTPUT"], "a") as out:
+              out.write(f"tag={tag}\nversion={version}\nsha={sha}\npublish={str(publish).lower()}\n")
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as out:
+              out.write(f"Target: `{tag}` at `{sha}`. Create draft: `{publish}`.\n")
+
+  source:
+    name: Source archives and installed-package check
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.validate.outputs.sha }}
           persist-credentials: false
       - uses: ./.github/actions/setup-native
-      - name: Verify tag, build and package source
+      - name: Archive tracked source and build the extracted package
         env:
-          RELEASE_TAG: ${{ github.ref_name }}
+          VERSION: ${{ needs.validate.outputs.version }}
         shell: bash
         run: |
-          version=$(sed -nE 's/^project\(lib_desfire VERSION ([0-9.]+) .*/\1/p' CMakeLists.txt)
-          test "$RELEASE_TAG" = "v$version"
-          cmake -S . -B build/release -DCMAKE_BUILD_TYPE=Release
+          package="lib-desfire-$VERSION"
+          mkdir -p release "$RUNNER_TEMP/release-source"
+          git archive --format=zip --prefix="$package/" --output="release/$package-source.zip" HEAD
+          git archive --format=tar.gz --prefix="$package/" --output="release/$package-source.tar.gz" HEAD
+          tar -xzf "release/$package-source.tar.gz" -C "$RUNNER_TEMP/release-source"
+          source="$RUNNER_TEMP/release-source/$package"
+          test -f "$source/LICENSE"
+          test -f "$source/src/dashboard/frontend/package-lock.json"
+          cmake -S "$source" -B build/release -DCMAKE_BUILD_TYPE=Release
           cmake --build build/release --parallel 2
           cmake --install build/release --prefix "$GITHUB_WORKSPACE/install"
-          cmake -S examples/consumer -B build/consumer -DCMAKE_PREFIX_PATH="$GITHUB_WORKSPACE/install"
+          cmake -S "$source/examples/consumer" -B build/consumer -DCMAKE_PREFIX_PATH="$GITHUB_WORKSPACE/install"
           cmake --build build/consumer --parallel 2
           ctest --test-dir build/consumer --output-on-failure
-          (cd build/release && cpack --config CPackSourceConfig.cmake)
-          mkdir -p release
-          cp "build/release/lib-desfire-$version-source.zip" release/
-          (cd release && sha256sum *.zip > SHA256SUMS)
-      - name: Create draft release with checksums
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release-source
+          path: release/*
+          if-no-files-found: error
+          overwrite: true
+
+  windows:
+    name: Windows x64 dashboard package
+    needs: validate
+    runs-on: windows-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ needs.validate.outputs.sha }}
+          persist-credentials: false
+      - uses: ./.github/actions/setup-native
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: src/dashboard/frontend/package-lock.json
+      - name: Build dashboard and validate frontend
+        shell: pwsh
+        run: |
+          cmake -S . -B build/release -A x64 -Dlib_desfire_build_dashboard=ON "-DOPENSSL_ROOT_DIR=$env:OPENSSL_ROOT_DIR"
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          cmake --build build/release --config Release --parallel 2
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          cmake --install build/release --config Release --prefix install
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          Push-Location src/dashboard/frontend
+          npm run lint
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          npm run format:check
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          Pop-Location
+      - name: Bundle runtime files, licenses and installation guide
+        env:
+          VERSION: ${{ needs.validate.outputs.version }}
+          SOURCE_SHA: ${{ needs.validate.outputs.sha }}
+        shell: pwsh
+        run: |
+          $bundle = "$env:RUNNER_TEMP/lib-desfire-$env:VERSION-windows-x64"
+          New-Item -ItemType Directory -Path $bundle | Out-Null
+          Copy-Item -Path install/bin/* -Destination $bundle -Recurse
+          Copy-Item -LiteralPath LICENSE,SECURITY.md -Destination $bundle
+          Copy-Item -LiteralPath docs/windows-release.md -Destination "$bundle/README.md"
+          $crypto = @(Get-ChildItem "$bundle/libcrypto*.dll")
+          if ($crypto.Count -ne 1) { throw 'Expected exactly one matching OpenSSL Crypto DLL.' }
+          $openssl = "$env:OPENSSL_ROOT_DIR/bin/openssl.exe"
+          if (!(Test-Path "$bundle/ossl-modules/legacy.dll")) {
+            $moduleDirectory = & $openssl info -modulesdir
+            if ($LASTEXITCODE) { exit $LASTEXITCODE }
+            $modules = @($moduleDirectory, "$env:OPENSSL_ROOT_DIR/lib/ossl-modules", "$env:OPENSSL_ROOT_DIR/bin/ossl-modules", "$env:OPENSSL_ROOT_DIR/bin") |
+              Where-Object { Test-Path "$_/legacy.dll" } | Select-Object -First 1
+            if (!$modules) { throw 'The matching OpenSSL legacy provider is missing.' }
+            New-Item -ItemType Directory -Force -Path "$bundle/ossl-modules" | Out-Null
+            Copy-Item -LiteralPath "$modules/legacy.dll" -Destination "$bundle/ossl-modules/legacy.dll"
+          }
+          $opensslVersion = & $openssl version
+          if ($LASTEXITCODE -or $opensslVersion -notmatch '^OpenSSL (\d+\.\d+\.\d+)\s') {
+            throw 'Cannot determine the installed OpenSSL version.'
+          }
+          $opensslTag = "openssl-$($Matches[1])"
+          Invoke-WebRequest -Uri "https://raw.githubusercontent.com/openssl/openssl/$opensslTag/LICENSE.txt" -OutFile "$bundle/dependencies/openssl.txt"
+          foreach ($notice in @('cpp-httplib','nlohmann-json','react','react-dom','scheduler','openssl')) {
+            if (!(Test-Path "$bundle/dependencies/$notice.txt")) { throw "Missing license notice: $notice" }
+          }
+          New-Item -ItemType Directory -Path "$bundle/prerequisites" | Out-Null
+          $redist = "$bundle/prerequisites/vc_redist.x64.exe"
+          Invoke-WebRequest -Uri 'https://aka.ms/vc14/vc_redist.x64.exe' -OutFile $redist
+          $signature = Get-AuthenticodeSignature -LiteralPath $redist
+          if ($signature.Status -ne 'Valid' -or $signature.SignerCertificate.Subject -notmatch 'O=Microsoft Corporation') {
+            throw 'The Visual C++ runtime installer must have a valid Microsoft signature.'
+          }
+          $files = Get-ChildItem $bundle -Recurse -File | Sort-Object FullName | ForEach-Object {
+            @{path=$_.FullName.Substring($bundle.Length + 1).Replace('\','/'); sha256=(Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()}
+          }
+          @{version=$env:VERSION; commit=$env:SOURCE_SHA; platform='windows-x64'; openssl=$opensslVersion;
+            visual_cpp_runtime=(Get-Item $redist).VersionInfo.FileVersion; files=@($files)} |
+            ConvertTo-Json -Depth 5 | Set-Content "$bundle/BUILD-INFO.json" -Encoding utf8
+          New-Item -ItemType Directory -Path release | Out-Null
+          Compress-Archive -LiteralPath $bundle -DestinationPath "release/lib-desfire-$env:VERSION-windows-x64.zip"
+      - name: Test the extracted Windows ZIP without a card
+        env:
+          VERSION: ${{ needs.validate.outputs.version }}
+        shell: pwsh
+        run: |
+          $smoke = "$env:RUNNER_TEMP/release-smoke"
+          Expand-Archive -LiteralPath "release/lib-desfire-$env:VERSION-windows-x64.zip" -DestinationPath $smoke
+          $bundle = "$smoke/lib-desfire-$env:VERSION-windows-x64"
+          $env:OPENSSL_MODULES = "$bundle/ossl-modules"
+          & "$env:OPENSSL_ROOT_DIR/bin/openssl.exe" list -providers -provider default -provider legacy
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          & "$bundle/desfire_dashboard.exe" --help
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          $version = & "$bundle/desfire_dashboard.exe" --version
+          if ($LASTEXITCODE -or "$version" -notmatch [regex]::Escape($env:VERSION)) { throw 'Packaged version mismatch.' }
+          $process = Start-Process -FilePath "$bundle/desfire_dashboard.exe" -ArgumentList '--port','18765' -WindowStyle Hidden -PassThru
+          try {
+            $ready = $false
+            for ($attempt = 0; $attempt -lt 30; $attempt++) {
+              if ($process.HasExited) { throw 'The packaged dashboard exited before becoming ready.' }
+              try {
+                $response = Invoke-WebRequest -Uri 'http://127.0.0.1:18765/' -TimeoutSec 2
+                if ($response.StatusCode -eq 200 -and $response.Content -match '<div id="root">') { $ready = $true; break }
+              } catch { Start-Sleep -Milliseconds 500 }
+            }
+            if (!$ready) { throw 'The extracted dashboard did not serve its web assets.' }
+          } finally {
+            if (!$process.HasExited) { Stop-Process -Id $process.Id }
+          }
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release-windows
+          path: release/*.zip
+          if-no-files-found: error
+          overwrite: true
+
+  collect:
+    name: Checksums and optional draft release
+    needs: [validate, source, windows]
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: release-source
+          path: release
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: release-windows
+          path: release
+      - name: Verify expected archives and generate checksums
+        env:
+          VERSION: ${{ needs.validate.outputs.version }}
+        shell: bash
+        run: |
+          cd release
+          test -s "lib-desfire-$VERSION-source.zip"
+          test -s "lib-desfire-$VERSION-source.tar.gz"
+          test -s "lib-desfire-$VERSION-windows-x64.zip"
+          sha256sum *.zip *.tar.gz > SHA256SUMS
+          sha256sum --check SHA256SUMS
+          cat SHA256SUMS >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: release-files
+          path: release/*
+          if-no-files-found: error
+          overwrite: true
+      - name: Create or update a draft; never overwrite a published release
+        if: needs.validate.outputs.publish == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-          RELEASE_TAG: ${{ github.ref_name }}
-        run: gh release create "$RELEASE_TAG" release/* --verify-tag --draft --generate-notes --title "$RELEASE_TAG"
+          RELEASE_TAG: ${{ needs.validate.outputs.tag }}
+        shell: bash
+        run: |
+          if draft=$(gh release view "$RELEASE_TAG" --json isDraft --jq .isDraft); then
+            test "$draft" = true || { echo 'Refusing to modify a published release.' >&2; exit 1; }
+          else
+            gh release create "$RELEASE_TAG" --verify-tag --draft --generate-notes --title "$RELEASE_TAG"
+          fi
+          gh release upload "$RELEASE_TAG" release/* --clobber

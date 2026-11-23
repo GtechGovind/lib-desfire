@@ -8,6 +8,7 @@
 
 [![CI](https://github.com/GtechGovind/lib-desfire/actions/workflows/ci.yml/badge.svg)](https://github.com/GtechGovind/lib-desfire/actions/workflows/ci.yml)
 [![CodeQL](https://github.com/GtechGovind/lib-desfire/actions/workflows/codeql.yml/badge.svg)](https://github.com/GtechGovind/lib-desfire/actions/workflows/codeql.yml)
+[![Release](https://github.com/GtechGovind/lib-desfire/actions/workflows/release.yml/badge.svg)](https://github.com/GtechGovind/lib-desfire/actions/workflows/release.yml)
 [![C++17](https://img.shields.io/badge/C%2B%2B-17-00599C?logo=cplusplus&logoColor=white)](https://en.cppreference.com/w/cpp/17)
 [![License: MIT](https://img.shields.io/badge/License-MIT-22c55e.svg)](LICENSE)
 [![Sponsor](https://img.shields.io/badge/Sponsor-GtechGovind-ea4aaa?logo=githubsponsors&logoColor=white)](https://github.com/sponsors/GtechGovind)
@@ -155,7 +156,7 @@ Read the [security model and reporting policy](SECURITY.md) before deployment.
 | [HTTP API](docs/http-api.md) | Routes, arguments, errors and concurrency |
 | [Public headers](lib/include) | Bounds, ownership, state transitions and transport contracts |
 | [Contributing](CONTRIBUTING.md) | Development workflow and verification requirements |
-| [Release checks](docs/release.md) | Source packaging, release automation and qualification |
+| [Release workflow](docs/release.md) | Source archives, Windows dashboard ZIP, manual package tests and draft releases |
 | [GitHub features](docs/github.md) | CI, security scanning, dependency updates, Pages and sponsorship |
 
 ## Built for collaboration
